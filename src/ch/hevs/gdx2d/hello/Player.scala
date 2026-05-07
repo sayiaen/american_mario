@@ -10,8 +10,8 @@ class Player(var x: Float, var y:Float) extends Entity {
   var vx = 0f
 
   val speed = 400f
-  val gravity = 1000f
-  val jumpForce = -800f
+  val gravity = -1000f
+  val jumpForce = 800f
   var onGround = false
 
   override def update(dt: Float): Unit = {
