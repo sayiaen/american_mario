@@ -1,6 +1,7 @@
 package ch.hevs.gdx2d.mygame
 
 import ch.hevs.gdx2d.desktop.PortableApplication
+import ch.hevs.gdx2d.hello.Platform
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
@@ -9,14 +10,23 @@ import com.badlogic.gdx.{Gdx, Input}
 
 class AmericanMario extends PortableApplication(1920, 1080) {
   var player: Player =_
+  var platforms = List[Platform]()
 
   override def onInit(): Unit = {
     setTitle("mario-phase1")
     player = new Player(200, 500)
+    platforms = List(
+      new Platform(0,50,1920,100),
+      new Platform(500,400,300,40)
+    )
+
   }
 
   override def onGraphicRender(g: GdxGraphics): Unit = {
     g.clear(Color.WHITE)
+    platforms.foreach(p => p.draw(g))
+    player.draw(g)
+
     val dt = Gdx.graphics.getDeltaTime
 
     player.vx = 0
@@ -28,8 +38,9 @@ class AmericanMario extends PortableApplication(1920, 1080) {
       player.vy = player.jumpForce
       player.onGround = false // Mario is now in the air
     }
-    player.update(dt)
-    player.draw(g)
+    player.update(dt, platforms)
+
+
 
   }
 }

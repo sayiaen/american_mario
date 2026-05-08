@@ -1,5 +1,6 @@
 package ch.hevs.gdx2d.mygame
 
+import ch.hevs.gdx2d.hello.Platform
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
 
@@ -14,7 +15,7 @@ class Player(var x: Float, var y:Float) extends Entity {
   val jumpForce = 800f
   var onGround = false
 
-  override def update(dt: Float): Unit = {
+  override def update(dt: Float, platforms: List[Platform]): Unit = {
     vy += gravity * dt
 
     x += vx *dt
