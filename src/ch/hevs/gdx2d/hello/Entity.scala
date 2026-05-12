@@ -1,6 +1,6 @@
 package ch.hevs.gdx2d.mygame
 
-import ch.hevs.gdx2d.hello.Platform
+import ch.hevs.gdx2d.mygame.Platform
 import ch.hevs.gdx2d.lib.GdxGraphics
 
 trait Entity {

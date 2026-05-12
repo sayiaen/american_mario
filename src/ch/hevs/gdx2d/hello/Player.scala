@@ -1,6 +1,6 @@
 package ch.hevs.gdx2d.mygame
 
-import ch.hevs.gdx2d.hello.Platform
+import ch.hevs.gdx2d.mygame.Platform
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
 
@@ -15,13 +15,7 @@ class Player(var x: Float, var y:Float) extends Entity {
   val jumpForce = 800f
   var onGround = false
 
-  override def update(dt: Float, platforms: List[Platform]): Unit = {
-
-    vy += gravity * dt
-    x += vx *dt
-    y += vy * dt
-
-    platforms.foreach { P =>
+  def collidesWith(P: Platform) : Boolean = {
       val marioLeft = x
       val marioRiht= x + width
       val marioBottom = y
@@ -32,26 +26,48 @@ class Player(var x: Float, var y:Float) extends Entity {
       val platformBottom = P.y
       val platformTop = P.y + P.height
 
-      if(marioRiht > platformLeft &&
-         marioLeft < platformRight &&
-         marioBottom < platformTop &&
-         marioTop > platformBottom) {
-
-        if(vy < 0) {
-          y = platformTop
-          vy = 0
-          onGround = true
-        }
-      }
-    }
-
+        marioRiht > platformLeft &&
+        marioLeft < platformRight &&
+        marioBottom < platformTop &&
+        marioTop > platformBottom
 
 
   }
 
+  override def update(dt: Float, platforms: List[Platform]): Unit = {
+
+
+    x += vx *dt
+    for(p <- platforms){
+      if(collidesWith(p)) {
+        if(vx > 0) x = p.x -width
+        else if(vx<0) x =p.x + p.width
+        vx = 0
+      }
+    }
+
+    vy += gravity * dt
+    y += vy * dt
+    onGround = false
+
+    for(p <- platforms){
+      if(collidesWith(p)){
+        if(vy < 0) {
+          y =p.y + p.height
+          vy = 0
+          onGround = true
+        } else if (vy > 0){
+          y = p.y - height
+          vy = 0
+
+        }
+      }
+    }
+  }
+
   override def draw(g: GdxGraphics): Unit = {
     g.setColor(Color.BLUE)
-    g.drawFilledRectangle(x + width/2,y + height/2 ,width,height,0)
+    g.drawFilledRectangle(x + width/2, y + height/2 , width, height,0)
 
   }
 }
