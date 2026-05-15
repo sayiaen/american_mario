@@ -29,7 +29,7 @@ class Player(var x: Float, var y:Float) extends Entity {
         marioRiht > platformLeft &&
         marioLeft < platformRight &&
         marioBottom < platformTop &&
-        marioTop > platformBottom
+        marioTop > platformBottom // error on contact with the end goal, if fixed direction key failure
 
 
   }

@@ -14,14 +14,16 @@ class AmericanMario extends PortableApplication(1920, 1080) {
 
   override def onInit(): Unit = {
     setTitle("mario-phase1")
+
+    death_manager.init()
    platforms = List(
-      new Platform(0,500,1000,100),//starting point
-      new Platform(1200, 700, 100, 100),
-      new Platform(1600, 700, 100, 100),
-      new Platform(2000,700,100,100),
-      new Platform(2400,800,600,100),
-      new Platform(3500, 1000, 500, 50),
-      new Platform(4200,1000,400,100,true),
+      new Platform(0,100,1000,100),//starting point
+      new Platform(1200, 300, 100, 100),
+      new Platform(1600, 300, 100, 100),
+      new Platform(2000,300,100,100),
+      new Platform(2400,400,600,100),
+      new Platform(3500, 6000, 500, 50),
+      new Platform(4200,6000,400,100,true),
 
     )
    player = new Player(100, 700)
@@ -46,17 +48,19 @@ class AmericanMario extends PortableApplication(1920, 1080) {
       g.clear(Color.WHITE)
 
       val camX = if(player.x < 960) 0f else (player.x -960)
-      //val camY = 540f
-      g.moveCamera(camX, 540)
+      //val camY = math.max(540f, player.y)//ask how to have a camera both follows horizontal and diagonal
+      g.moveCamera(camX, 50)
 
       platforms.foreach(p => p.draw(g))
-      player.draw(g)
 
-      if (player.y < 0) {
+      death_manager.draw(g, camX)
+
+      if(death_manager.died(player, dt)) {
+        println("DEATH")
         println("Game Over")
         onInit()
       }
-
+      player.draw(g)
       platforms.foreach(p =>
         if (p.isGoal) {
           if (player.collidesWith(p)) {
