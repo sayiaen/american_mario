@@ -5,6 +5,10 @@ import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
 
 class Player(var x: Float, var y:Float) extends Entity {
+  var health = 5
+  var invinnciblityttimer = 0f
+  var damageCooldown = 1.5f
+
   var width = 40f
   var height = 40f
   var vy = 0f
@@ -14,6 +18,18 @@ class Player(var x: Float, var y:Float) extends Entity {
   val gravity = -1000f
   val jumpForce = 800f
   var onGround = false
+
+  def takedamage(amount: Int): Unit = {
+    if(invinnciblityttimer <= 0){
+      health -= amount
+      invinnciblityttimer = damageCooldown
+      println(s"Took damage! remaining health: $health")
+    }
+  }
+
+  def updateinvincibilty(dt: Float): Unit = {
+    if (invinnciblityttimer > 0) invinnciblityttimer -= dt
+  }
 
   def collidesWith(P: Platform) : Boolean = {
       val marioLeft = x

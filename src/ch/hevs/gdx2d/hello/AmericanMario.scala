@@ -53,13 +53,15 @@ class AmericanMario extends PortableApplication(1920, 1080) {
 
       platforms.foreach(p => p.draw(g))
 
-      death_manager.draw(g, camX)
 
-      if(death_manager.died(player, dt)) {
+
+      if(death_manager.checkStatus(player, dt)) {
         println("DEATH")
         println("Game Over")
         onInit()
       }
+
+      death_manager.draw(g, camX, player)
       player.draw(g)
       platforms.foreach(p =>
         if (p.isGoal) {
