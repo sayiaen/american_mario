@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Color
 
 class Platform(var x: Float, var y: Float, var width: Float, var height: Float, var isGoal: Boolean = false) extends Entity{
 
-  override def update(dt: Float, platforms: List[Platform]): Unit = {}
+  override def update(dt: Float, platforms: List[Platform], camX: Float): Unit = {}
 
   override def draw(g: GdxGraphics): Unit = {
     if(isGoal)g.setColor(Color.GOLD)

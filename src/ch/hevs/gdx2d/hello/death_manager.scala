@@ -2,6 +2,7 @@ package ch.hevs.gdx2d.mygame
 import ch.hevs.gdx2d.hello.{Bullet, Minion, enemies}
 import com.badlogic.gdx.graphics.Color
 import ch.hevs.gdx2d.lib.GdxGraphics
+import org.graalvm.nativeimage.Platforms
 
 import scala.collection.mutable.ListBuffer
 
@@ -11,22 +12,20 @@ object death_manager {
   val bulletList = ListBuffer[Bullet]()
 
 
-  def init(): Unit = {
+  def init(spawnedEnemies: List[enemies]): Unit = {
     enemieslist.clear()
     bulletList.clear()
-    enemieslist += new Minion(900, 300, 200)
-    enemieslist += new Minion(2200, 400, 300)
-
+    enemieslist ++= spawnedEnemies
   }
 
-  def spawnBullet(startX: Float, startY: Float, direction: Float): Unit ={
-    bulletList += new Bullet(startX, startY, direction)
+  def spawnBullet(startX: Float, startY: Float, vx: Float, vy: Float): Unit ={
+    bulletList += new Bullet(startX, startY, vx, vy)
   }
 
 
 
 
-    def checkStatus(player: Player, dt: Float, camX: Float): Boolean = {
+    def checkStatus(player: Player, dt: Float, camX: Float, platforms: List[Platform]): Boolean = {
       player.updateinvincibilty(dt)
 
       if(player.y < Lava_level) {
@@ -39,7 +38,7 @@ object death_manager {
     val deadBullet = ListBuffer[Bullet]()
 
     for (e <- enemieslist) {
-      e.update(dt)
+      e.update(dt, platforms)
 
       if (e.KillChck(player)) {
         val isfalling = player.vy < 0
@@ -47,7 +46,7 @@ object death_manager {
         val enemyhead = e.y + e.height
 
         if (isfalling && mariofeet >= enemyhead - 15f) {
-          player.vy = 400f // Bounceback after the stomp
+          player.vy = 600f // Bounceback after the stomp
           val isDead = e.takeDamage(2)
           if (isDead) deadEnemies += e
           println("Stomped")
@@ -63,7 +62,15 @@ object death_manager {
       if(b.x < camX || b.x > camX + 1920){
         deadBullet += b
       }
+
+      for (p <- platforms) {
+        if (b.hitPlatform(p)) {
+          deadBullet += b
+        }
+      }
+
       for (e <- enemieslist) {
+        e.update(dt, platforms)
         if (b.hit(e)) {
           deadBullet += b
           if (e.takeDamage(b.damage)) {

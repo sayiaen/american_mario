@@ -1,7 +1,5 @@
 package ch.hevs.gdx2d.mygame
 
-import com.badlogic.gdx.math.{Intersector, Rectangle, Vector2}
-
 import ch.hevs.gdx2d.mygame.Platform
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.{Gdx, Input}
@@ -52,16 +50,34 @@ class Player(var x: Float, var y: Float) extends Entity {
       marioTop >= platformBottom
   }
 
+  import com.badlogic.gdx.math.{Intersector, Rectangle, Vector2}
 
-
-  override def update(dt: Float, platforms: List[Platform]): Unit = {
+  override def update(dt: Float, platforms: List[Platform], camX: Float): Unit = {
     updateinvincibilty(dt)
 
     if (vx > 0) FacingDirection = 1f
     if (vx < 0) FacingDirection = -1f
 
-    if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
-      death_manager.spawnBullet(x + width / 2, y + height / 2, FacingDirection)
+
+    if (Gdx.input.justTouched()) {//logic to use the mouse to fire taken from online
+      val bulletSpeed = 700f
+      val spawnX = x + width / 2
+      val spawnY = y + height / 2
+
+      val mouseWorldX = Gdx.input.getX + camX
+      val mouseWorldY = 1080f - Gdx.input.getY // Inverts screen layout height
+
+      // Calculate directional distance values
+      val deltaX = mouseWorldX - spawnX
+      val deltaY = mouseWorldY - spawnY
+      val distance = math.sqrt((deltaX * deltaX) + (deltaY * deltaY)).toFloat
+
+      if (distance > 0) {
+        val bulletVx = (deltaX / distance) * bulletSpeed
+        val bulletVy = (deltaY / distance) * bulletSpeed
+
+        death_manager.spawnBullet(spawnX, spawnY, bulletVx, bulletVy)
+      }
     }
 
     // Move both axes
@@ -76,10 +92,7 @@ class Player(var x: Float, var y: Float) extends Entity {
     for (p <- platforms) {
       val platformRect = new Rectangle(p.x, p.y, p.width, p.height)
 
-      if (Intersector.overlapConvexPolygons(
-        rectToPolygon(playerRect),
-        rectToPolygon(platformRect),
-        mtv)) {
+      if (Intersector.overlapConvexPolygons(rectToPolygon(playerRect), rectToPolygon(platformRect), mtv)) {
 
         // Push player out by the minimum amount
         x += mtv.normal.x * mtv.depth
@@ -114,7 +127,7 @@ class Player(var x: Float, var y: Float) extends Entity {
       r.x,          r.y + r.height
     ))
     poly
-  }//this is the logic used in libgdx2d for collisions i took it from there an modified to mine after a brief research
+  }//this is the logic used in libgdx2d for collisions i took it from there and modified to mine after a brief research
   override def draw(g: GdxGraphics): Unit = {
     g.setColor(Color.BLUE)
     g.drawFilledRectangle(x + width / 2, y + height / 2, width, height, 0)

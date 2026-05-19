@@ -9,6 +9,6 @@ trait Entity {
   var width: Float
   var height: Float
 
-  def update(dt: Float, platform: List[Platform]): Unit
+  def update(dt: Float, platform: List[Platform], camX: Float): Unit
   def draw(g: GdxGraphics): Unit
 }
