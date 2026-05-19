@@ -1,0 +1,28 @@
+package ch.hevs.gdx2d.hello
+
+import ch.hevs.gdx2d.lib.GdxGraphics
+import com.badlogic.gdx.graphics.Color
+
+class Bullet(var x: Float, var y: Float, val direction: Float) {
+  val speed = 600f
+  val width = 15f
+  val height = 8f
+  val damage = 1
+
+  def update(dt: Float): Unit = {
+    x += speed * direction * dt // 1f for right, -1f for left
+  }
+
+  def draw(g: GdxGraphics): Unit ={
+    g.setColor(Color.GRAY)
+    g.drawFilledRectangle(x + width/2, y+height/2, width, height, 0)
+  }
+
+  def hit(e:enemies): Boolean={ //got these calculations from gemini
+    x < e.x + e.width &&
+      x + width > e.x &&
+      y < e.y + e.height &&
+      y + height > e.y
+  }
+
+}

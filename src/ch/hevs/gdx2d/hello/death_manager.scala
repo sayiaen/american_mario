@@ -1,5 +1,5 @@
 package ch.hevs.gdx2d.mygame
-import ch.hevs.gdx2d.hello.{Minion, enemies}
+import ch.hevs.gdx2d.hello.{Bullet, Minion, enemies}
 import com.badlogic.gdx.graphics.Color
 import ch.hevs.gdx2d.lib.GdxGraphics
 
@@ -7,26 +7,38 @@ import scala.collection.mutable.ListBuffer
 
 object death_manager {
   val Lava_level = 50f
-  val enemies = ListBuffer[enemies]()
+  val enemieslist = ListBuffer[enemies]()
+  val bulletList = ListBuffer[Bullet]()
+
 
   def init(): Unit = {
-    enemies.clear()
-    enemies += new Minion(900, 300, 200)
-    enemies += new Minion(2200, 400, 300)
+    enemieslist.clear()
+    bulletList.clear()
+    enemieslist += new Minion(900, 300, 200)
+    enemieslist += new Minion(2200, 400, 300)
+
   }
 
-  def checkStatus(player: Player, dt: Float): Boolean = {
-    player.updateinvincibilty(dt)
+  def spawnBullet(startX: Float, startY: Float, direction: Float): Unit ={
+    bulletList += new Bullet(startX, startY, direction)
+  }
 
 
-    if (player.y < Lava_level) {
-      player.health = 0
-      return true
+
+
+    def checkStatus(player: Player, dt: Float, camX: Float): Boolean = {
+      player.updateinvincibilty(dt)
+
+      if(player.y < Lava_level) {
+        player.health = 0
+        return true
+
     }
 
     val deadEnemies = ListBuffer[enemies]()
+    val deadBullet = ListBuffer[Bullet]()
 
-    for (e <- enemies) {
+    for (e <- enemieslist) {
       e.update(dt)
 
       if (e.KillChck(player)) {
@@ -35,7 +47,7 @@ object death_manager {
         val enemyhead = e.y + e.height
 
         if (isfalling && mariofeet >= enemyhead - 15f) {
-          player.vy = 200f // Bounceback after the stomp
+          player.vy = 400f // Bounceback after the stomp
           val isDead = e.takeDamage(2)
           if (isDead) deadEnemies += e
           println("Stomped")
@@ -44,7 +56,24 @@ object death_manager {
         }
       }
     }
-    enemies --= deadEnemies
+
+    for(b <- bulletList){
+      b.update(dt)
+
+      if(b.x < camX || b.x > camX + 1920){
+        deadBullet += b
+      }
+      for (e <- enemieslist) {
+        if (b.hit(e)) {
+          deadBullet += b
+          if (e.takeDamage(b.damage)) {
+            deadEnemies += e
+          }
+        }
+      }
+    }
+    enemieslist --= deadEnemies
+    bulletList --= deadBullet
     player.health <= 0
   }
 
@@ -59,6 +88,8 @@ object death_manager {
       g.setColor(Color.RED)
       g.drawString(camX + 50, 1000, s"HEALTH: ${"<3" * player.health}", 30)
 
-      enemies.foreach((_.draw(g)))
+      enemieslist.foreach((_.draw(g)))
+
+      bulletList.foreach(_.draw(g))
     }
   }

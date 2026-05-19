@@ -14,16 +14,16 @@ class AmericanMario extends PortableApplication(1920, 1080) {
 
   override def onInit(): Unit = {
     setTitle("mario-phase1")
-
     death_manager.init()
+
    platforms = List(
       new Platform(0,100,1000,100),//starting point
       new Platform(1200, 300, 100, 100),
       new Platform(1600, 300, 100, 100),
       new Platform(2000,300,100,100),
       new Platform(2400,400,600,100),
-      new Platform(3500, 6000, 500, 50),
-      new Platform(4200,6000,400,100,true),
+      new Platform(3500, 600, 500, 50),
+      new Platform(4200,600,400,100,true),
 
     )
    player = new Player(100, 700)
@@ -37,6 +37,7 @@ class AmericanMario extends PortableApplication(1920, 1080) {
     if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) player.vx = player.speed
     if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) player.vx = -player.speed
 
+
     // Jumping: Only if the player is touching the ground
     if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && player.onGround) {
       player.vy = player.jumpForce
@@ -49,13 +50,13 @@ class AmericanMario extends PortableApplication(1920, 1080) {
 
       val camX = if(player.x < 960) 0f else (player.x -960)
       //val camY = math.max(540f, player.y)//ask how to have a camera both follows horizontal and diagonal
-      g.moveCamera(camX, 50)
+      g.moveCamera(camX, 50f)
 
       platforms.foreach(p => p.draw(g))
 
 
 
-      if(death_manager.checkStatus(player, dt)) {
+      if(death_manager.checkStatus(player, dt, camX)) {
         println("DEATH")
         println("Game Over")
         onInit()
@@ -63,6 +64,7 @@ class AmericanMario extends PortableApplication(1920, 1080) {
 
       death_manager.draw(g, camX, player)
       player.draw(g)
+
       platforms.foreach(p =>
         if (p.isGoal) {
           if (player.collidesWith(p)) {
