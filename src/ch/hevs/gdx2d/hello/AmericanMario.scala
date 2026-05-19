@@ -7,9 +7,9 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.Input
 import ch.hevs.gdx2d.hello.{Minion, enemies}
 
-// 1. THE RECURSIVE GENERATOR
+// THE RECURSIVE GENERATOR
 object LevelBuilder {
-  // Recursively generates platforms
+  // generates platforms
   def buildPlatforms(count: Int, startX: Float, startY: Float, acc: List[Platform] = Nil): List[Platform] = {
     if (count <= 0) acc
     else {
@@ -27,7 +27,7 @@ object LevelBuilder {
     }
   }
 
-  // Recursively generates enemies and places them on valid platforms
+  //generates enemies and places them on valid platforms
   def buildEnemies(count: Int, validPlatforms: List[Platform], acc: List[enemies] = Nil): List[enemies] = {
     if (count <= 0 || validPlatforms.isEmpty) acc
     else {
@@ -39,13 +39,13 @@ object LevelBuilder {
   }
 
   def generateLevel(levelNum: Int): (List[Platform], List[enemies]) = {
-    // Formula for scaling difficulty
-    val pCount = 10 + ((levelNum - 1) * 4)
+    //scaling
+    val pCount = 1 + ((levelNum - 1) * 4)
     val eCount = 4 + ((levelNum - 1) * 2)
 
     val platforms = buildPlatforms(pCount, 0f, 200f)
 
-    // Don't spawn enemies on the first platform (spawn) or the last (goal)
+    //no enemies on the first and last platforms
     val validEnemyPlatforms = platforms.tail.filterNot(_.isGoal)
     val monsters = buildEnemies(eCount, validEnemyPlatforms)
 

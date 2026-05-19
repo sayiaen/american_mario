@@ -9,6 +9,10 @@ abstract class enemies(var x: Float, var y: Float, val width: Float, val height:
 
   def update(dt: Float, platforms: List[Platform]): Unit
 
+  def canShoot: Boolean = false
+  def shoot(): Unit={}
+
+
   def KillChck(player: Player): Boolean = {
     player.x < x + width &&
       player.x + player.width > x &&
@@ -17,8 +21,8 @@ abstract class enemies(var x: Float, var y: Float, val width: Float, val height:
 
   }
 
-  def takeDamage(amount: Int): Boolean = {
-    health -= amount
+  def takeDamage(D_amount: Int): Boolean = {
+    health -= D_amount
     health <= 0
   }
 }
