@@ -5,7 +5,7 @@ import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.Input
-import ch.hevs.gdx2d.hello.{Minion, enemies}
+import ch.hevs.gdx2d.hello.{LootBox, Minion, enemies}
 
 // THE RECURSIVE GENERATOR
 object LevelBuilder {
@@ -38,20 +38,38 @@ object LevelBuilder {
     }
   }
 
-  def generateLevel(levelNum: Int): (List[Platform], List[enemies]) = {
+  def generateLevel(levelNum: Int): (List[Platform], List[enemies], List[LootBox]) = {
     //scaling
     val pCount = 1 + ((levelNum + 1) * 4)
     val eCount = 4 + ((levelNum - 1) * 2)
+    val lbCount = 2 +(levelNum -1)
 
     val platforms = buildPlatforms(pCount, 0f, 200f)
 
     //no enemies on the first and last platforms
     val validEnemyPlatforms = platforms.tail.filterNot(_.isGoal)
+    val boxes = buildLootBoxes(lbCount, validEnemyPlatforms)
     val monsters = buildEnemies(eCount, validEnemyPlatforms)
 
-    (platforms, monsters)
+    (platforms, monsters, boxes)
   }
-}
+  def buildLootBoxes(count: Int, validPlatforms: List[Platform], acc: List[LootBox] = Nil): List[LootBox] ={
+
+  if(count <= 0 || validPlatforms.isEmpty) acc
+    else{
+    val p = validPlatforms(scala.util.Random.nextInt(validPlatforms.length))
+
+    val spawnX = p.x + scala.util.Random.between(20f, math.max(21f, p.width - 60f))
+    val spawnY = p.y + p.height + 60
+
+    val lb = new LootBox(spawnX, spawnY)
+
+    val restofPlatforms = validPlatforms.filterNot(_ == p)
+
+    buildLootBoxes(count-1, restofPlatforms, acc :+ lb)
+    }
+  }
+  }
 
 // 2. THE MAIN GAME CLASS
 class AmericanMario extends PortableApplication(1920, 1080) {
@@ -65,11 +83,11 @@ class AmericanMario extends PortableApplication(1920, 1080) {
     setTitle(s"Mario - Level $currentLevel of $maxLevels")
 
     // Call the recursive generator
-    val (genPlatforms, genEnemies) = LevelBuilder.generateLevel(currentLevel)
+    val (genPlatforms, genEnemies, genBoxes) = LevelBuilder.generateLevel(currentLevel)
     platforms = genPlatforms
 
     // Pass the generated enemies into the death manager
-    death_manager.init(genEnemies)
+    death_manager.init(genEnemies, genBoxes)
 
     // Spawn player safely on the first platform
     player = new Player(platforms.head.x + 50f, platforms.head.y + 100f)

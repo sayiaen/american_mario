@@ -12,12 +12,13 @@ object death_manager {
   val lootBoxList = ListBuffer[LootBox]()
 
 
-  def init(spawnedEnemies: List[enemies]): Unit = {
+  def init(spawnedEnemies: List[enemies], spawnedBoxes: List[LootBox]): Unit = {
     enemieslist.clear()
     bulletList.clear()
     lootBoxList.clear()
 
     enemieslist ++= spawnedEnemies
+    lootBoxList ++= spawnedBoxes
   }
 
   def spawnBullet(startX: Float, startY: Float, vx: Float, vy: Float): Unit = {
@@ -36,6 +37,7 @@ object death_manager {
 
     val deadEnemies = ListBuffer[enemies]()
     val deadBullet = ListBuffer[Bullet]()
+    val usedLootBoxes = ListBuffer[LootBox]()
 
     for (e <- enemieslist) {
       e.update(dt, platforms)
@@ -74,22 +76,24 @@ object death_manager {
         if (b.x < lb.x + lb.width && b.x + b.width > lb.x &&
           b.y < lb.y + lb.height && b.y + b.height > lb.y) {
 
-          bulletList -= b // Remove bullet on hit
+          deadBullet += b
           if (lb.takeDamage(b.damage)) {
-            lootBoxList -= lb
+            usedLootBoxes += lb
             GameManager.scoreCalculator(100) // Grant points when broken
             GameManager.RPG += 3 // Grant ammo
+            player.health = math.min(5, player.health+1)
           }
         }
       }
 
 
       for (e <- enemieslist) {
-        e.update(dt, platforms)
+        if(!deadBullet.contains(b) && !deadEnemies.contains(e))
         if (b.hit(e)) {
           deadBullet += b
           if (e.takeDamage(b.damage)) {
             deadEnemies += e
+            GameManager.scoreCalculator(50)
 
 
 
@@ -100,6 +104,7 @@ object death_manager {
     }
     enemieslist --= deadEnemies
     bulletList --= deadBullet
+    lootBoxList --= usedLootBoxes
 
     player.health <= 0
   }
