@@ -114,9 +114,9 @@ object death_manager {
       bulletList.foreach(_.draw(g))
 
       g.setColor(Color.BLACK)
-      g.drawString(camX + 30, 1020, s"SCORE: ${GameManager.totalScore}", 36)
-      g.drawString(camX + 30, 980, s"GRENADE: ${GameManager.RPG}", 36)
-      g.drawString(camX + 30, 940, s"HEALTH: ${player.health}", 36)
+      g.drawString(camX + 90, 1020, s"SCORE: ${GameManager.totalScore}", 36)
+      g.drawString(camX + 90, 980, s"GRENADE: ${GameManager.RPG}", 36)
+      g.drawString(camX + 90, 940, s"HEALTH: ${player.health}", 36)
 
 
     }

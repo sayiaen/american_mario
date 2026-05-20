@@ -40,7 +40,7 @@ object LevelBuilder {
 
   def generateLevel(levelNum: Int): (List[Platform], List[enemies]) = {
     //scaling
-    val pCount = 1 + ((levelNum - 1) * 4)
+    val pCount = 1 + ((levelNum + 1) * 4)
     val eCount = 4 + ((levelNum - 1) * 2)
 
     val platforms = buildPlatforms(pCount, 0f, 200f)
