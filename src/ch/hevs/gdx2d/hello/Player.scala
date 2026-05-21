@@ -4,6 +4,8 @@ import ch.hevs.gdx2d.mygame.Platform
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.{Gdx, Input}
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.math.{Intersector, Rectangle}
+import ch.hevs.gdx2d.hello.GameManager
 
 class Player(var x: Float, var y: Float) extends Entity {
   var health = 5
@@ -25,7 +27,7 @@ class Player(var x: Float, var y: Float) extends Entity {
     if (invinnciblityttimer <= 0) {
       health -= amount
       invinnciblityttimer = damageCooldown
-      println(s"Took damage! remaining health: $health")
+      println(s"remaining health: $health")
     }
   }
 
@@ -50,37 +52,48 @@ class Player(var x: Float, var y: Float) extends Entity {
       marioTop >= platformBottom
   }
 
-  import com.badlogic.gdx.math.{Intersector, Rectangle, Vector2}
-
   override def update(dt: Float, platforms: List[Platform], camX: Float): Unit = {
     updateinvincibilty(dt)
 
-    if (vx > 0) FacingDirection = 1f
-    if (vx < 0) FacingDirection = -1f
+    // 1. MOVEMENT INPUT CONTROLS
+    vx = 0f
+    if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+      vx = speed
+      FacingDirection = 1f
+    }
+    if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+      vx = -speed
+      FacingDirection = -1f
+    }
 
+    // JUMP CONTROL
+    if (Gdx.input.isKeyJustPressed(Input.Keys.UP) && onGround) {
+      vy = jumpForce
+      onGround = false
+    }
 
-    if (Gdx.input.justTouched()) {//logic to use the mouse to fire taken from online
-      val bulletSpeed = 700f
-      val spawnX = x + width / 2
-      val spawnY = y + height / 2
+    // 2. COMBAT SHOOTING CONTROLS
+    // 'F' for standard horizontal bullets
+    if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+      val bulletSpeed = 600f * FacingDirection
+      death_manager.spawnBullet(x + width / 2, y + height / 2, bulletSpeed, 0f)
+    }
 
-      val mouseWorldX = Gdx.input.getX + camX
-      val mouseWorldY = 1080f - Gdx.input.getY // Inverts screen layout height
+    // 'G' for ballistic arcing RPG missiles
+    if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+      if (GameManager.RPG > 0) {
+        GameManager.RPG -= 1 // Deduct 1 ammo stock reserve
 
-      // Calculate directional distance values
-      val deltaX = mouseWorldX - spawnX
-      val deltaY = mouseWorldY - spawnY
-      val distance = math.sqrt((deltaX * deltaX) + (deltaY * deltaY)).toFloat
+        val launchVx = 350f * FacingDirection
+        val launchVy = 450f // Initial upward push vector
 
-      if (distance > 0) {
-        val bulletVx = (deltaX / distance) * bulletSpeed
-        val bulletVy = (deltaY / distance) * bulletSpeed
-
-        death_manager.spawnBullet(spawnX, spawnY, bulletVx, bulletVy)
+        death_manager.spawnRPG(x + width / 2, y + height, launchVx, launchVy)
+      } else {
+        println("OUT OF RPG AMMO! Smash green LootBoxes upwards to restock.")
       }
     }
 
-    // Move both axes
+    // 3. PHYSICS ENGINE & MOVEMENT INTEGRATION
     x += vx * dt
     vy += gravity * dt
     y += vy * dt
@@ -93,41 +106,35 @@ class Player(var x: Float, var y: Float) extends Entity {
       val platformRect = new Rectangle(p.x, p.y, p.width, p.height)
 
       if (Intersector.overlapConvexPolygons(rectToPolygon(playerRect), rectToPolygon(platformRect), mtv)) {
-
-        // Push player out by the minimum amount
+        // Push player out by minimum translation vector values
         x += mtv.normal.x * mtv.depth
         y += mtv.normal.y * mtv.depth
-
 
         if (mtv.normal.y > 0.5f) {
           vy = 0
           onGround = true
         }
-
         else if (mtv.normal.y < -0.5f) {
           vy = 0
         }
-
         else if (math.abs(mtv.normal.x) > 0.5f) {
           vx = 0
         }
-
 
         playerRect.set(x, y, width, height)
       }
     }
   }
 
-  // Helper: convert Rectangle to polygon for Intersector
   def rectToPolygon(r: Rectangle): com.badlogic.gdx.math.Polygon = {
-    val poly = new com.badlogic.gdx.math.Polygon(Array(
+    new com.badlogic.gdx.math.Polygon(Array(
       r.x,          r.y,
       r.x + r.width, r.y,
       r.x + r.width, r.y + r.height,
       r.x,          r.y + r.height
     ))
-    poly
-  }//this is the logic used in libgdx2d for collisions i took it from there and modified to mine after a brief research
+  }
+
   override def draw(g: GdxGraphics): Unit = {
     g.setColor(Color.BLUE)
     g.drawFilledRectangle(x + width / 2, y + height / 2, width, height, 0)

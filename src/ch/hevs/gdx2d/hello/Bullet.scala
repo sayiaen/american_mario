@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Color
 class Bullet(var x: Float, var y: Float,val vx: Float, val vy: Float) {
   val width = 15f
   val height = 8f
-  val damage = 1
+  val damage = 5
 
   def update(dt: Float): Unit = {
     x += vx * dt

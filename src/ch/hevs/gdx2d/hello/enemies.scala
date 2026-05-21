@@ -2,8 +2,9 @@ package ch.hevs.gdx2d.hello
 import ch.hevs.gdx2d.lib.GdxGraphics
 import ch.hevs.gdx2d.mygame.{Player, Platform}
 
-abstract class enemies(var x: Float, var y: Float, val width: Float, val height: Float, val maxHealth: Int = 1) {
+abstract class enemies(var x: Float, var y: Float, var width: Float, var height: Float, var maxHealth: Int = 1) {
   var health: Int = maxHealth
+  var isDead = false
 
   def draw(g: GdxGraphics): Unit
 
@@ -23,7 +24,8 @@ abstract class enemies(var x: Float, var y: Float, val width: Float, val height:
 
   def takeDamage(D_amount: Int): Boolean = {
     health -= D_amount
-    health <= 0
+    if(health <= 0) isDead = true
+    isDead
   }
 }
 
