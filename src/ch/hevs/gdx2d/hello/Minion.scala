@@ -1,7 +1,7 @@
 package ch.hevs.gdx2d.hello
 import ch.hevs.gdx2d.lib.GdxGraphics
 import ch.hevs.gdx2d.mygame.Platform
-import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.{Intersector, Rectangle}
 
 class Minion(val StartX: Float, val StartY: Float, val Range: Float) extends enemies(StartX, StartY, 40f, 40f, maxHealth = 2) {
@@ -60,9 +60,8 @@ class Minion(val StartX: Float, val StartY: Float, val Range: Float) extends ene
     }
 
 
-    // 3. Sentient Edge Detection
+    //Edge Detection
     if (onGround) {
-      // If minion walks too far from the center of their spawn platform, turn around so they don't fall off
       if (x > StartX + (Range / 2) - width) {
         direction = -1
       } else if (x < StartX - (Range / 2)) {
@@ -82,8 +81,13 @@ class Minion(val StartX: Float, val StartY: Float, val Range: Float) extends ene
 
 
   override def draw(g: GdxGraphics): Unit = {
-    g.setColor(Color.RED)
-    g.drawFilledRectangle(x + width/2, y + height/2, width, height,90)
+    val region = new TextureRegion(Assets.minionTex)
+    if(direction >0){
+      region.flip(true, false)
+    }
+    g.draw(region, x, y, width, height)
+    //g.setColor(Color.RED)
+    //g.drawFilledRectangle(x + width/2, y + height/2, width, height,90)
   }
 }
 

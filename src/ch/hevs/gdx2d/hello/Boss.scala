@@ -5,6 +5,8 @@ import ch.hevs.gdx2d.mygame.Platform
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.{Intersector, Rectangle, Polygon}
 
+
+
  class Boss ( val StartX: Float, val StartY: Float, val bossArenaleftX: Float, val bossarenaWidth: Float) extends enemies(StartX, StartY, 80f, 80f, 200){
   val maxWidth = 120
   val maxHeight = 120
@@ -95,8 +97,8 @@ import com.badlogic.gdx.math.{Intersector, Rectangle, Polygon}
     ))
 
   override def draw(g: GdxGraphics): Unit = {
-    if(!isvulnerable) g.setColor(Color.BLUE)else g.setColor(Color.PURPLE)
-    g.drawFilledRectangle(x+width, y+height, width, height, 0)
+    if(!isvulnerable) g.draw(Assets.bossTex, x, y, width, height)else g.draw(Assets.boss_ph_2, x, y, width, height)
+
 
 
   }

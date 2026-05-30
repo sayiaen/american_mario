@@ -5,7 +5,8 @@ import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.Input
-import ch.hevs.gdx2d.hello.{Boss, LootBox, Minion, enemies}
+import ch.hevs.gdx2d.hello.{Assets, Boss, LootBox, Minion, enemies}
+import com.badlogic.gdx.graphics.Texture
 
 // THE RECURSIVE GENERATOR
 object LevelBuilder {
@@ -79,8 +80,12 @@ class AmericanMario extends PortableApplication(1920, 1080) {
   var currentLevel = 1
   var maxLevels = AmericanMario.targetLevels
 
+
+
   override def onInit(): Unit = {
     setTitle(s"Mario - Level $currentLevel of $maxLevels")
+    Assets.load()
+
     val (genPlatforms, genEnemies, genBoxes) = LevelBuilder.generateLevel(currentLevel, maxLevels)
     platforms = genPlatforms
     death_manager.init(genEnemies, genBoxes)

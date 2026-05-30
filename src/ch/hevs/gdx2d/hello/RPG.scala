@@ -10,14 +10,11 @@ class RPG (var x: Float, var y: Float, var vx: Float, var vy: Float) {
   val height = 16
   val gravity = -1000
 
-  var timer =2.0
   var explode = false
 
 def update(dt: Float, platforms: List[Platform]): Unit ={
-  timer -= dt
-  if(timer <= 0){
-    explode=true
-  }
+
+
   vy += gravity*dt
   x += vx *dt
   y += vy * dt
@@ -34,10 +31,7 @@ def update(dt: Float, platforms: List[Platform]): Unit ={
   }
 }
   def draw(g:GdxGraphics):Unit = {//flashing effcet to visualise the timer
-    if((timer * 12).toInt % 2 == 0) g.setColor(Color.GREEN)
-    else g.setColor(Color.RED)
-
-    g.drawFilledCircle(x+width/2, y+height/2, width/2, Color.CYAN)
+   g.draw(Assets.RPGTex, x, y, width, height)
 
 
   }

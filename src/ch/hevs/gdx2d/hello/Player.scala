@@ -5,15 +5,16 @@ import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.{Gdx, Input}
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.{Intersector, Rectangle}
-import ch.hevs.gdx2d.hello.GameManager
+import ch.hevs.gdx2d.hello.{Assets, GameManager}
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 
 class Player(var x: Float, var y: Float) extends Entity {
   var health = 5
   var invinnciblityttimer = 0f
   var damageCooldown = 1.5f
 
-  var width = 40f
-  var height = 40f
+  var width = 60f
+  var height = 60f
   var vy = 0f
   var vx = 0f
 
@@ -136,7 +137,12 @@ class Player(var x: Float, var y: Float) extends Entity {
   }
 
   override def draw(g: GdxGraphics): Unit = {
-    g.setColor(Color.BLUE)
-    g.drawFilledRectangle(x + width / 2, y + height / 2, width, height, 0)
+    val region = new TextureRegion(Assets.playerTex)
+    if(FacingDirection < 0){
+      region.flip(true, false)
+    }
+    g.draw(region, x, y, width, height)
+     //g.setColor(Color.BLUE)
+     //   g.drawFilledRectangle(x + width / 2, y + height / 2, width, height, 0)
   }
 }
