@@ -97,9 +97,12 @@ import com.badlogic.gdx.math.{Intersector, Rectangle, Polygon}
     ))
 
   override def draw(g: GdxGraphics): Unit = {
-    if(!isvulnerable) g.draw(Assets.bossTex, x, y, width, height)else g.draw(Assets.boss_ph_2, x, y, width, height)
+    val basebossskin = GameManager.selectbossskin match{
+      case _ => if(!isvulnerable) g.draw(Assets.bossTex, x, y, width, height)else g.draw(Assets.boss_ph_2, x, y, width, height)
+      case 1 => if(!isvulnerable) g.draw(Assets.boss_2_Tex, x, y, width, height)else g.draw(Assets.boss_2_ph_2_Tex, x, y, width, height)
 
 
 
+    }
   }
 }

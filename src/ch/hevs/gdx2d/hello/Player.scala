@@ -137,6 +137,10 @@ class Player(var x: Float, var y: Float) extends Entity {
   }
 
   override def draw(g: GdxGraphics): Unit = {
+    val activeplayerSkin = GameManager.selectmarioskin match{
+      case _ => Assets.playerTex
+      case 1 => Assets.player_2_Tex
+    }
     val region = new TextureRegion(Assets.playerTex)
     if(FacingDirection < 0){
       region.flip(true, false)

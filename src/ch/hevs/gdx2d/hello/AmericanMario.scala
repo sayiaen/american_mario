@@ -5,7 +5,8 @@ import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.Input
-import ch.hevs.gdx2d.hello.{Assets, Boss, LootBox, Minion, enemies}
+import ch.hevs.gdx2d.hello.{Assets, Boss, GameManager, LootBox, Minion, enemies}
+import com.badlogic.gdx.Input.Buttons
 import com.badlogic.gdx.graphics.Texture
 
 // THE RECURSIVE GENERATOR
@@ -74,6 +75,7 @@ object LevelBuilder {
 
 // THE MAIN GAME CLASS
 class AmericanMario extends PortableApplication(1920, 1080) {
+  var gameState: String = "MENU"
   var player: Player = _
   var platforms = List[Platform]()
 
@@ -81,78 +83,159 @@ class AmericanMario extends PortableApplication(1920, 1080) {
   var maxLevels = AmericanMario.targetLevels
 
 
-
   override def onInit(): Unit = {
     setTitle(s"Mario - Level $currentLevel of $maxLevels")
     Assets.load()
 
+  }
+
+  def initLevel(): Unit = {
     val (genPlatforms, genEnemies, genBoxes) = LevelBuilder.generateLevel(currentLevel, maxLevels)
     platforms = genPlatforms
     death_manager.init(genEnemies, genBoxes)
     player = new Player(platforms.head.x + 50f, platforms.head.y + 100f)
+
   }
 
   override def onGraphicRender(g: GdxGraphics): Unit = {
     val dt = Gdx.graphics.getDeltaTime
+    gameState match {
+      case "MENU" =>
+        g.moveCamera(0, 0)
+        g.clear(Color.DARK_GRAY)
 
-    g.clear(Color.WHITE)
+        g.setColor(Color.WHITE)
+        g.drawString(450, 950, "AMERICAN MARIO", 80)
+        g.drawString(450, 850, s"CURRENT SCORE = ${GameManager.totalScore}", 64)
 
-    // Horizontal linear scrolling tracker variables
-    val camX = if (player.x < 960) 0f else (player.x - 960)
+        // Get current mouse coordinates and adjust for flipped screen origin
+        val mouseX = Gdx.input.getX.toFloat
+        val mouseY = 1080f - Gdx.input.getY.toFloat
 
-    // Updates internal velocity variables, inputs, weapon spawns, and tile checks
-    player.update(dt, platforms, camX)
+        // ----------------------------------------------------
+        // LEVEL CONTROLLER INTERFACE: DYNAMIC LEVEL SELECTOR
+        // ----------------------------------------------------
+        g.setColor(Color.WHITE)
+        g.drawString(720, 780, "TARGET LEVELS TO GENERATE:", 20)
 
-    g.moveCamera(camX, 50f)
-    platforms.foreach(p => p.draw(g))
+        // Configuration layout boundaries for Minus [-] Button
+        val minusX = 1060f; val minusY = 750f; val minusW = 50f; val minusH = 50f
+        g.setColor(Color.LIGHT_GRAY)
+        g.drawFilledRectangle(minusX + minusW / 2, minusY + minusH / 2, minusW, minusH, 0)
+        g.setColor(Color.BLACK)
+        g.drawString(minusX + 18, minusY + 35, "-", 24)
 
-    if (death_manager.checkStatus(player, dt, camX, platforms)) {
-      println("DEATH - Restarting Level")
-      onInit()
-    }
+        // Configuration layout boundaries for Plus [+] Button
+        val plusX = 1200f; val plusY = 750f; val plusW = 50f; val plusH = 50f
+        g.setColor(Color.LIGHT_GRAY)
+        g.drawFilledRectangle(plusX + plusW / 2, plusY + plusH / 2, plusW, plusH, 0)
+        g.setColor(Color.BLACK)
+        g.drawString(plusX + 14, plusY + 35, "+", 24)
 
-    death_manager.draw(g, camX, player)
-    player.draw(g)
+        // Draw the current chosen number value right between the two buttons
+        g.setColor(Color.GOLD)
+        g.drawString(1135, 785, s"$maxLevels", 26)
 
-    // Level progression check loop
-    platforms.foreach(p =>
-      if (p.isGoal && player.collidesWith(p)) {
-        if (currentLevel < maxLevels) {
-          println(s"Level $currentLevel Complete! Advancing...")
-          currentLevel += 1
-          onInit()
-        } else {
-          g.setColor(Color.RED)
-          g.drawString(camX + 500, 600, "GAME BEAT! YOU WON!", 50)
-          if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            currentLevel = 1
-            onInit()
+        // Check if a single crisp click happened on this frame
+        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
+
+          // MOUSE HIT CHECK: Minus Button Box
+          if (mouseX >= minusX && mouseX <= (minusX + minusW) && mouseY >= minusY && mouseY <= (minusY + minusH)) {
+            if (maxLevels > 1) {
+              maxLevels -= 1
+              AmericanMario.targetLevels = maxLevels
+            }
+          }
+
+          // MOUSE HIT CHECK: Plus Button Box
+          if (mouseX >= plusX && mouseX <= (plusX + plusW) && mouseY >= plusY && mouseY <= (plusY + plusH)) {
+            if (maxLevels < 10) {
+              maxLevels += 1
+              AmericanMario.targetLevels = maxLevels
+            }
           }
         }
-      }
-    )
-    g.drawFPS()
-  }
-}
 
-object AmericanMario {
-  var targetLevels: Int = 1
+        // ----------------------------------------------------
+        // START GAME BUTTON RENDER & HIT LOGIC
+        // ----------------------------------------------------
+        val btnX = 800f; val btnY = 500f; val btnW = 300f; val btnH = 80f
 
-  def main(args: Array[String]): Unit = {
-    println("======================================")
-    println("      WELCOME TO MARIO GENERATOR      ")
-    println("======================================")
-    print("Enter the number of levels to generate: ")
+        g.setColor(Color.GREEN)
+        g.drawFilledRectangle(btnX + btnW / 2, btnY + btnH / 2, btnW, btnH, 0)
+        g.setColor(Color.BLACK)
+        g.drawString(btnX + 60, btnY + 50, "START GAME", 24)
 
-    try {
-      targetLevels = scala.io.StdIn.readInt()
-      if (targetLevels <= 0) targetLevels = 1
-    } catch {
-      case _: Throwable =>
-        println("Invalid input, defaulting to 3 levels.")
-        targetLevels = 3
+        // MOUSE HIT CHECK: Start Game Button Box
+        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
+          if (mouseX >= btnX && mouseX <= (btnX + btnW) && mouseY >= btnY && mouseY <= (btnY + btnH)) {
+            gameState = "PLAY" // Links up perfectly with your gameplay case label!
+            initLevel()
+          }
+        }
+      case "PLAY" =>
+
+
+        g.clear(Color.WHITE)
+
+
+        // Horizontal tracker available, vertical doesn't work(didn't use much but still want to know how to)
+        val camX = if (player.x < 960) 0f else (player.x - 960)
+
+        // Updates internal velocity variables, inputs, weapon spawns, and tile checks
+        player.update(dt, platforms, camX)
+
+        g.moveCamera(camX, 50f)
+        g.draw(Assets.backgroundTex, camX, 0, 1920, 1080) // crashes after the 1. death,
+
+        platforms.foreach(p => p.draw(g))
+
+        if (death_manager.checkStatus(player, dt, camX, platforms)) {
+          println("DEATH - Restarting Level")
+          onInit()
+        }
+
+        death_manager.draw(g, camX, player)
+        player.draw(g)
+
+        // Level progression check loop
+        platforms.foreach(p =>
+          if (p.isGoal && player.collidesWith(p)) {
+            if (currentLevel < maxLevels) {
+              println(s"Level $currentLevel Complete! Advancing...")
+              currentLevel += 1
+              onInit()
+            } else {
+              g.setColor(Color.RED)
+              g.drawString(camX + 500, 600, "GAME BEAT! YOU WON!", 50)
+              if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+                currentLevel = 1
+                onInit()
+              }
+            }
+          }
+        )
+        g.drawFPS()
     }
-
-    new AmericanMario()
+    }
   }
+
+  object AmericanMario {
+    var targetLevels: Int = 1
+
+    def main(args: Array[String]): Unit = {
+      //println("======================================")
+      //println("      WELCOME TO MARIO GENERATOR      ")
+      //println("======================================")
+      //print("Enter the number of levels to generate: ")
+
+      //try {
+        //targetLevels = scala.io.StdIn.readInt()
+        //if (targetLevels <= 0) targetLevels = 1
+      //} catch {
+        //case _: Throwable =>
+          //println("Invalid input, defaulting to 3 levels.")
+          //targetLevels = 3
+      new AmericanMario()
+      }
 }
