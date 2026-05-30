@@ -6,7 +6,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.Input
 import ch.hevs.gdx2d.hello.{Assets, Boss, GameManager, LootBox, Minion, enemies}
-import com.badlogic.gdx.Input.Buttons
 import com.badlogic.gdx.graphics.Texture
 
 // THE RECURSIVE GENERATOR
@@ -105,71 +104,29 @@ class AmericanMario extends PortableApplication(1920, 1080) {
         g.clear(Color.DARK_GRAY)
 
         g.setColor(Color.WHITE)
-        g.drawString(450, 950, "AMERICAN MARIO", 80)
-        g.drawString(450, 850, s"CURRENT SCORE = ${GameManager.totalScore}", 64)
+        g.drawString(450, 950, "AMERICAN MARIO", 40)
+        g.drawString(450, 850, s"CURRENT SCORE = ${GameManager.totalScore}", 24)
 
-        // Get current mouse coordinates and adjust for flipped screen origin
-        val mouseX = Gdx.input.getX.toFloat
-        val mouseY = 1080f - Gdx.input.getY.toFloat
+        val btnX = 800f;
+        val btnY = 500f;
+        val btnW = 300f;
+        val btnH = 80f
 
-        // ----------------------------------------------------
-        // LEVEL CONTROLLER INTERFACE: DYNAMIC LEVEL SELECTOR
-        // ----------------------------------------------------
-        g.setColor(Color.WHITE)
-        g.drawString(720, 780, "TARGET LEVELS TO GENERATE:", 20)
-
-        // Configuration layout boundaries for Minus [-] Button
-        val minusX = 1060f; val minusY = 750f; val minusW = 50f; val minusH = 50f
-        g.setColor(Color.LIGHT_GRAY)
-        g.drawFilledRectangle(minusX + minusW / 2, minusY + minusH / 2, minusW, minusH, 0)
-        g.setColor(Color.BLACK)
-        g.drawString(minusX + 18, minusY + 35, "-", 24)
-
-        // Configuration layout boundaries for Plus [+] Button
-        val plusX = 1200f; val plusY = 750f; val plusW = 50f; val plusH = 50f
-        g.setColor(Color.LIGHT_GRAY)
-        g.drawFilledRectangle(plusX + plusW / 2, plusY + plusH / 2, plusW, plusH, 0)
-        g.setColor(Color.BLACK)
-        g.drawString(plusX + 14, plusY + 35, "+", 24)
-
-        // Draw the current chosen number value right between the two buttons
-        g.setColor(Color.GOLD)
-        g.drawString(1135, 785, s"$maxLevels", 26)
-
-        // Check if a single crisp click happened on this frame
-        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
-
-          // MOUSE HIT CHECK: Minus Button Box
-          if (mouseX >= minusX && mouseX <= (minusX + minusW) && mouseY >= minusY && mouseY <= (minusY + minusH)) {
-            if (maxLevels > 1) {
-              maxLevels -= 1
-              AmericanMario.targetLevels = maxLevels
-            }
-          }
-
-          // MOUSE HIT CHECK: Plus Button Box
-          if (mouseX >= plusX && mouseX <= (plusX + plusW) && mouseY >= plusY && mouseY <= (plusY + plusH)) {
-            if (maxLevels < 10) {
-              maxLevels += 1
-              AmericanMario.targetLevels = maxLevels
-            }
-          }
-        }
-
-        // ----------------------------------------------------
-        // START GAME BUTTON RENDER & HIT LOGIC
-        // ----------------------------------------------------
-        val btnX = 800f; val btnY = 500f; val btnW = 300f; val btnH = 80f
-
+        // rectangle for button
         g.setColor(Color.GREEN)
         g.drawFilledRectangle(btnX + btnW / 2, btnY + btnH / 2, btnW, btnH, 0)
         g.setColor(Color.BLACK)
         g.drawString(btnX + 60, btnY + 50, "START GAME", 24)
 
-        // MOUSE HIT CHECK: Start Game Button Box
-        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
+        // MOUSE HIT DETECTION LOGIC: taken by ai to not waste too much time
+
+        val mouseX = Gdx.input.getX.toFloat
+        val mouseY = 1080f - Gdx.input.getY.toFloat
+
+
+        if (Gdx.input.isButtonPressed(com.badlogic.gdx.Input.Buttons.LEFT)) {
           if (mouseX >= btnX && mouseX <= (btnX + btnW) && mouseY >= btnY && mouseY <= (btnY + btnH)) {
-            gameState = "PLAY" // Links up perfectly with your gameplay case label!
+            gameState = "PLAY"
             initLevel()
           }
         }
@@ -238,4 +195,9 @@ class AmericanMario extends PortableApplication(1920, 1080) {
           //targetLevels = 3
       new AmericanMario()
       }
+
+
+
+
+
 }
